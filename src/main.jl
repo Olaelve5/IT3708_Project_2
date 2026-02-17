@@ -5,16 +5,16 @@ include(joinpath(@__DIR__, "load_data.jl"))
 include(joinpath(@__DIR__, "Individual.jl"))
 include(joinpath(@__DIR__, "greedy_split.jl"))
 include(joinpath(@__DIR__, "plot.jl"))
+include(joinpath(@__DIR__, "Fitness.jl"))
 # include(joinpath(@__DIR__, "crossover.jl"))  # To be implemented
 # include(joinpath(@__DIR__, "mutation.jl"))   # To be implemented
-# include(joinpath(@__DIR__, "evaluate_fitness.jl"))  # To be implemented
 
 
 # =========== Parameters ============
 const INSTANCE_PATH = "data/train_0.json"
 const POP_SIZE = 100
 const MAX_GENERATIONS = 50
-# const NURSE_PENALTY_CONST = 10000.0
+const NURSE_PENALTY_FACTOR = 0
 
 
 # =========== GA Loop ===========
@@ -34,7 +34,8 @@ function main()
     println("Initializing population...")
     population = initialize_population(POP_SIZE, num_patients)
     
-    # TODO: Evaluate Initial Population
+    # Fill in fitness of initial population
+    population_fitness!(population, instance.travel_times, NURSE_PENALTY_FACTOR)
 
     # Evolution loop
     for gen in 1:MAX_GENERATIONS
@@ -55,7 +56,8 @@ function main()
             push!(offspring, child)
         end
         
-        # TODO: Evaluate Offspring
+        # Fill in fitness of offspring population
+        population_fitness(offspring, instance.travel_times, NURSE_PENALTY_FACTOR)
         # TODO: Survivor Selection (e.g., elitism, generational replacement)
 
         population = offspring # Placeholder for survivor selection
