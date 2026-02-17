@@ -1,3 +1,5 @@
+include("load_data.jl")
+
 function greedy_split(genotype::Vector{Int}, instance::Instance)
     route_lengths = Int[]
     
