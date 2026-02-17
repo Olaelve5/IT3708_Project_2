@@ -54,7 +54,7 @@ function greedy_split(genotype::Vector{Int}, instance::Instance)
                 error("Patient $patient_id is impossible to visit! (Check constraints vs Data)")
             end
 
-            push!(route_lengths, current_count)
+            push!(route_lengths, i-1)
 
             # Reset for NEW nurse
             current_count = 0
@@ -66,7 +66,7 @@ function greedy_split(genotype::Vector{Int}, instance::Instance)
 
     # Save the last route
     if current_count > 0
-        push!(route_lengths, current_count)
+        push!(route_lengths, i-1)
     end
     
     return route_lengths

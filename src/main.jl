@@ -4,6 +4,7 @@ using Statistics
 include(joinpath(@__DIR__, "load_data.jl"))
 include(joinpath(@__DIR__, "Individual.jl"))
 include(joinpath(@__DIR__, "greedy_split.jl"))
+include(joinpath(@__DIR__, "plot.jl"))
 # include(joinpath(@__DIR__, "crossover.jl"))  # To be implemented
 # include(joinpath(@__DIR__, "mutation.jl"))   # To be implemented
 # include(joinpath(@__DIR__, "evaluate_fitness.jl"))  # To be implemented
@@ -70,6 +71,15 @@ function main()
     println("\n--- GA Loop Finished ---")
     println("Final Best Fitness: $(population[1].fitness)")
     println("Genotype: $(population[1].genotype)")
+
+    # Plot the best solution
+    println("Plotting best solution...")
+
+    # Placeholder to test plot
+    population[1].splits = greedy_split(population[1].genotype, instance) 
+    println("Route splits (indices for each split): $(population[1].splits)")
+
+    plot_routes(instance, population[1])
 end
 
 # Run the script
