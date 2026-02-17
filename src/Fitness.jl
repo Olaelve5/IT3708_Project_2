@@ -22,7 +22,7 @@ function individual_distance(individual::Individual, travel_matrix::Matrix{Float
         last_patient::Int = 1
         for patient_idx in last_split+1:split
             current_patient = patients[patient_idx]
-            distance += travel_matrix[last_patient, current_patient] # To patient travel
+            distance += travel_matrix[last_patient, current_patient] # To-patient travel
             last_patient = current_patient
         end
         distance += travel_matrix[last_patient, 1] # Back to depot
@@ -35,10 +35,9 @@ end
 Returns fitness of individual based on total driving distance and
 penalty if eneabled.
 """
-function individual_fitness(individual::Individual, travel_matrix::Matrix{Float64}; penalty::Bool=false)::Float64
+function individual_fitness(individual::Individual, travel_matrix::Matrix{Float64}; penalty_factor::Float64)::Float64
     fitness = individual_distance(individual, travel_matrix)
-    if penalty
-        fitness += 0 # TODO: Add penalty functionality based on... something
-    end
-    return fitness
+    # TODO: Add penalty functionality based on... something
+    penalty = 0 * penalty_factor 
+    return fitness += penalty
 end
