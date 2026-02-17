@@ -1,5 +1,76 @@
-include("load_data.jl")
+using Random
+using Statistics 
 
-instance::Instance = load_instance("data/train_0.json")
+include(joinpath(@__DIR__, "load_data.jl"))
+include(joinpath(@__DIR__, "Individual.jl"))
+include(joinpath(@__DIR__, "greedy_split.jl"))
+# include(joinpath(@__DIR__, "crossover.jl"))  # To be implemented
+# include(joinpath(@__DIR__, "mutation.jl"))   # To be implemented
+# include(joinpath(@__DIR__, "evaluate_fitness.jl"))  # To be implemented
 
-println(instance.travel_times[1,2])
+
+# =========== Parameters ============
+const INSTANCE_PATH = "data/train_0.json"
+const POP_SIZE = 100
+const MAX_GENERATIONS = 50
+# const NURSE_PENALTY_CONST = 10000.0
+
+
+# =========== GA Loop ===========
+function main()
+    println("\n--- Starting GA ---")
+    
+    # Load Data
+    if !isfile(INSTANCE_PATH)
+        error("File not found: $INSTANCE_PATH")
+    end
+    println("Loading instance: $INSTANCE_PATH")
+    instance = load_instance(INSTANCE_PATH)
+    num_patients = length(instance.patients)
+    println("Loaded $(instance.instance_name): $num_patients patients, $(instance.nbr_nurses) nurses.")
+
+    # Initialize Population
+    println("Initializing population...")
+    population = initialize_population(POP_SIZE, num_patients)
+    
+    # TODO: Evaluate Initial Population
+
+    # Evolution loop
+    for gen in 1:MAX_GENERATIONS
+        # TODO: Selection (e.g., tournament, roulette wheel)
+        parents = population # Placeholder for selection
+
+        offspring = Individual[]
+        
+        # TODO: Crossover + Mutation to fill offspring population
+        while length(offspring) < POP_SIZE
+            # TODO: p1, p2 = select_parents(parents)
+            # TODO: child = crossover(p1, p2)
+            # TODO: mutate!(child)
+            
+            # For now, just copy a random parent so the code runs
+            parent = rand(parents)
+            child = Individual(copy(parent.genotype))
+            push!(offspring, child)
+        end
+        
+        # TODO: Evaluate Offspring
+        # TODO: Survivor Selection (e.g., elitism, generational replacement)
+
+        population = offspring # Placeholder for survivor selection
+        
+        # 5. Logging
+        current_best = population[1]
+        avg_fitness = mean(ind.fitness for ind in population)
+        
+        println("Gen $gen | Best: $(round(current_best.fitness, digits=2)) | Avg: $(round(avg_fitness, digits=2))")
+    
+    end
+
+    println("\n--- GA Loop Finished ---")
+    println("Final Best Fitness: $(population[1].fitness)")
+    println("Genotype: $(population[1].genotype)")
+end
+
+# Run the script
+main()
