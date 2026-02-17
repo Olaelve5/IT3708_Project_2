@@ -39,7 +39,7 @@ function load_instance(path::AbstractString)::Instance
 
     # patients: JSON has keys like "1", "2", ... -> convert to Int and sort
     pats_obj = raw["patients"]
-    ids = sort(parse.(Int, collect(keys(pats_obj))))
+    ids = sort(parse.(Int, String.(collect(keys(pats_obj)))))
 
     patients = Vector{Patient}(undef, length(ids))
     for (i, id) in enumerate(ids)
