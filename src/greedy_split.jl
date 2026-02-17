@@ -73,3 +73,10 @@ function greedy_split(genotype::Vector{Int}, instance::Instance)
     
     return route_lengths
 end
+
+"""Applies greedy split in place to all of population, filling in splits."""
+function population_splits!(population::Vector{Individual}, instance::Instance)
+    for individual in population
+        individual.splits = greedy_split(individual.genotype, instance)
+    end
+end

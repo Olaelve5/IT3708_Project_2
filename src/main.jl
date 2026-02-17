@@ -33,6 +33,9 @@ function main()
     # Initialize Population
     println("Initializing population...")
     population = initialize_population(POP_SIZE, num_patients)
+
+    # Fill in splits
+    population_splits!(population, instance)
     
     # Fill in fitness of initial population
     population_fitness!(population, instance.travel_times, NURSE_PENALTY_FACTOR)
@@ -55,6 +58,9 @@ function main()
             child = Individual(copy(parent.genotype))
             push!(offspring, child)
         end
+
+        # Fill in splits
+        population_splits!(offspring, instance)
         
         # Fill in fitness of offspring population
         population_fitness!(offspring, instance.travel_times, NURSE_PENALTY_FACTOR)
