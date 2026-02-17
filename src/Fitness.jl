@@ -41,3 +41,10 @@ function individual_fitness(individual::Individual, travel_matrix::Matrix{Float6
     penalty = 0 * penalty_factor 
     return fitness += penalty
 end
+
+"""Sets fitness of entire population as in place operation."""
+function population_fitness!(population::Vector{Individual}, travel_matrix::Matrix{Float64}; penalty_factor::Float64)
+    for individual in population
+        individual.fitness = individual_fitness(individual, travel_matrix, penalty_factor)
+    end
+end
