@@ -14,7 +14,7 @@ include(joinpath(@__DIR__, "Fitness.jl"))
 const INSTANCE_PATH = "data/train_0.json"
 const POP_SIZE = 100
 const MAX_GENERATIONS = 50
-const NURSE_PENALTY_FACTOR = 0
+const NURSE_PENALTY_FACTOR::Float64 = 0.0
 
 
 # =========== GA Loop ===========
@@ -57,7 +57,7 @@ function main()
         end
         
         # Fill in fitness of offspring population
-        population_fitness(offspring, instance.travel_times, NURSE_PENALTY_FACTOR)
+        population_fitness!(offspring, instance.travel_times, NURSE_PENALTY_FACTOR)
         # TODO: Survivor Selection (e.g., elitism, generational replacement)
 
         population = offspring # Placeholder for survivor selection
