@@ -40,6 +40,7 @@ function main()
     # Fill in fitness of initial population
     population_fitness!(population, instance.travel_times, NURSE_PENALTY_FACTOR)
 
+    best_ever = population[1] # Init
     # Evolution loop
     for gen in 1:MAX_GENERATIONS
         # TODO: Selection (e.g., tournament, roulette wheel)
@@ -69,25 +70,29 @@ function main()
         population = offspring # Placeholder for survivor selection
         
         # 5. Logging
-        current_best = population[1]
+        current_best_idx = argmax(ind.fitness for ind in population)
+        current_best = population[current_best_idx]
         avg_fitness = mean(ind.fitness for ind in population)
         
         println("Gen $gen | Best: $(round(current_best.fitness, digits=2)) | Avg: $(round(avg_fitness, digits=2))")
+
+        if current_best.fitness < best_ever.fitness
+            best_ever = current_best
+        end
     
     end
 
     println("\n--- GA Loop Finished ---")
-    println("Final Best Fitness: $(population[1].fitness)")
-    println("Genotype: $(population[1].genotype)")
+    println("Final Best Fitness: $(round(best_ever.fitness, digits=2))")
+    println("Genotype: $(best_ever.genotype)")
 
     # Plot the best solution
     println("Plotting best solution...")
 
     # Placeholder to test plot
-    population[1].splits = greedy_split(population[1].genotype, instance) 
-    println("Route splits (indices for each split): $(population[1].splits)")
+    println("Route splits (indices for each split): $(best_ever.splits)")
 
-    plot_routes(instance, population[1])
+    plot_routes(instance, best_ever)
 end
 
 # Run the script
