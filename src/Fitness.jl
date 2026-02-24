@@ -22,8 +22,8 @@ function individual_distance(individual::Individual, travel_matrix::Matrix{Float
         last_patient::Int = 1
         for patient_idx in last_split+1:split
             current_patient = patients[patient_idx]
-            distance += travel_matrix[last_patient, current_patient] # To-patient travel
-            last_patient = current_patient
+            distance += travel_matrix[last_patient, current_patient+1] # To-patient travel
+            last_patient = current_patient+1
         end
         distance += travel_matrix[last_patient, 1] # Back to depot
         last_split = split
