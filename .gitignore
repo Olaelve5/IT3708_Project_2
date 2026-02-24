@@ -1,1 +1,3 @@
-*.png
+
+plots/
+plots/*.png

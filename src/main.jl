@@ -12,12 +12,13 @@ include(joinpath(@__DIR__, "parent_selection.jl"))
 include(joinpath(@__DIR__, "best_splits.jl"))
 include(joinpath(@__DIR__, "crowding.jl"))
 include(joinpath(@__DIR__, "elitism.jl"))
+include(joinpath(@__DIR__, "entropy.jl"))
 
 
 # =========== Parameters ============
-const INSTANCE_PATH = "data/train_0.json"
-const POP_SIZE = 5000
-const MAX_GENERATIONS = 1000
+const INSTANCE_PATH = "data/train_8.json"
+const POP_SIZE = 10000
+const MAX_GENERATIONS = 1500
 const NURSE_PENALTY_FACTOR::Float64 = 1.0
 
 
@@ -51,11 +52,11 @@ function main()
         offspring = Individual[]
         
         while length(offspring) < POP_SIZE
-            p1, p2 = select_parents(population, 6)
+            p1, p2 = select_parents(population, 10)
             c1, c2 = route_crossover(p1, p2, instance)
             # reversal_mutation!(child, 1/length(child.genotype))
-            swap_mutation!(c1, 1/length(c1.genotype)*2)
-            swap_mutation!(c2, 1/length(c2.genotype)*2)
+            swap_mutation!(c1, 1.5/length(c1.genotype))
+            swap_mutation!(c2, 1.5/length(c2.genotype))
 
             survivor1, survivor2 = deterministic_crowding(p1, p2, c1, c2)
 
@@ -68,6 +69,7 @@ function main()
             child.fitness, child.splits = prins_algo(child.genotype, instance)
         end
 
+        #population = offspring
         population = elitism(population, offspring, 50)
         sort!(population, by = ind -> ind.fitness)
 
@@ -75,8 +77,10 @@ function main()
         current_best_idx = argmin(ind.fitness for ind in population)
         current_best = population[current_best_idx]
         avg_fitness = mean(ind.fitness for ind in population)
+        percentage = 100 * (current_best.fitness - instance.benchmark) / instance.benchmark
+        entropy = calculate_population_entropy(population)
         
-        println("Gen $gen | Best: $(round(current_best.fitness, digits=2)) | Avg: $(round(avg_fitness, digits=2))")
+        println("Gen $gen | Best: $(round(current_best.fitness, digits=2)) | Avg: $(round(avg_fitness, digits=2)) | % from benchmark: $(round(percentage, digits=2))% | Entropy: $(round(entropy, digits=2))%")
 
         if current_best.fitness < best_ever.fitness
             best_ever = current_best
