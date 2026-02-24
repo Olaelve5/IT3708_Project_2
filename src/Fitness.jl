@@ -33,7 +33,7 @@ end
 
 """
 Returns fitness of individual based on total driving distance and
-penalty if eneabled.
+penalty if enabled.
 """
 function individual_fitness(individual::Individual, travel_matrix::Matrix{Float64}, penalty_factor::Float64)::Float64
     fitness = individual_distance(individual, travel_matrix)
@@ -43,7 +43,7 @@ function individual_fitness(individual::Individual, travel_matrix::Matrix{Float6
 end
 
 """Sets fitness of entire population as in place operation."""
-function population_fitness!(population::Vector{Individual}, travel_matrix::Matrix{Float64}, penalty_factor::Float64)
+function population_fitness!(population::Vector{Individual}, instance::Instance, penalty_factor::Float64)
     for individual in population
         individual.fitness = individual_fitness(individual, travel_matrix, penalty_factor)
     end
