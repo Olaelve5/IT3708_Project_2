@@ -35,16 +35,29 @@ end
 Returns fitness of individual based on total driving distance and
 penalty if enabled.
 """
-function individual_fitness(individual::Individual, travel_matrix::Matrix{Float64}, penalty_factor::Float64)::Float64
-    fitness = individual_distance(individual, travel_matrix)
-    # TODO: Add penalty functionality based on... something
-    penalty = 0 * penalty_factor 
-    return fitness += penalty
+function individual_fitness(individual::Individual, instance::Instance, penalty_factor::Float64)::Float64
+    fitness = individual_distance(individual, instance.travel_times)
+    # TODO: Add more penalty functions...?
+    penalty = count_missed_patients(individual, instance.nbr_nurses)
+    penalty_scaled = penalty * penalty_factor
+    return fitness += penalty_scaled
 end
 
 """Sets fitness of entire population as in place operation."""
 function population_fitness!(population::Vector{Individual}, instance::Instance, penalty_factor::Float64)
     for individual in population
-        individual.fitness = individual_fitness(individual, travel_matrix, penalty_factor)
+        individual.fitness = individual_fitness(individual, instance, penalty_factor)
+    end
+end
+
+function count_missed_patients(individual::Individual, n_nurses::Int)
+    nurses_used = length(individual.splits)
+
+    if nurses_used ≤ n_nurses
+        return 0
+    else
+        last_feasible_patient_idx = individual.splits[n_nurses]
+        n_patients_over = length(individual.genotype) - last_feasible_patient_idx
+        return n_patients_over
     end
 end
