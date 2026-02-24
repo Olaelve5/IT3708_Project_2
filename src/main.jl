@@ -11,6 +11,7 @@ include(joinpath(@__DIR__, "mutation.jl"))   # To be implemented
 include(joinpath(@__DIR__, "parent_selection.jl"))
 include(joinpath(@__DIR__, "best_splits.jl"))
 include(joinpath(@__DIR__, "crowding.jl"))
+include(joinpath(@__DIR__, "elitism.jl"))
 
 
 # =========== Parameters ============
@@ -50,11 +51,11 @@ function main()
         offspring = Individual[]
         
         while length(offspring) < POP_SIZE
-            p1, p2 = select_parents(population, 10)
+            p1, p2 = select_parents(population, 6)
             c1, c2 = route_crossover(p1, p2, instance)
             # reversal_mutation!(child, 1/length(child.genotype))
-            swap_mutation!(c1, 1/length(c1.genotype))
-            swap_mutation!(c2, 1/length(c2.genotype))
+            swap_mutation!(c1, 1/length(c1.genotype)*2)
+            swap_mutation!(c2, 1/length(c2.genotype)*2)
 
             survivor1, survivor2 = deterministic_crowding(p1, p2, c1, c2)
 
@@ -66,13 +67,10 @@ function main()
         for child in offspring
             child.fitness, child.splits = prins_algo(child.genotype, instance)
         end
-        
-        # Fill in fitness of offspring population
-        # population_fitness!(offspring, instance.travel_times, NURSE_PENALTY_FACTOR)
-        # TODO: Survivor Selection (e.g., elitism, generational replacement)
 
-        population = offspring # Placeholder for survivor selection
+        population = elitism(population, offspring, 50)
         sort!(population, by = ind -> ind.fitness)
+
         # 5. Logging
         current_best_idx = argmin(ind.fitness for ind in population)
         current_best = population[current_best_idx]
