@@ -38,7 +38,7 @@ function main()
     population_splits!(population, instance)
     
     # Fill in fitness of initial population
-    population_fitness!(population, instance.travel_times, NURSE_PENALTY_FACTOR)
+    population_fitness!(population, instance, NURSE_PENALTY_FACTOR)
 
     best_ever = population[1] # Init
     # Evolution loop
@@ -64,7 +64,7 @@ function main()
         population_splits!(offspring, instance)
         
         # Fill in fitness of offspring population
-        population_fitness!(offspring, instance.travel_times, NURSE_PENALTY_FACTOR)
+        population_fitness!(offspring, instance, NURSE_PENALTY_FACTOR)
         # TODO: Survivor Selection (e.g., elitism, generational replacement)
 
         population = offspring # Placeholder for survivor selection
