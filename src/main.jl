@@ -42,9 +42,6 @@ function main()
     for ind in population
         ind.fitness, ind.splits = prins_algo(ind.genotype, instance)
     end
-    
-    # Fill in fitness of initial population
-    # population_fitness!(population, instance.travel_times, NURSE_PENALTY_FACTOR)
 
     best_ever = population[1] # Init
     # Evolution loop
@@ -53,10 +50,16 @@ function main()
         
         while length(offspring) < POP_SIZE
             p1, p2 = select_parents(population, 10)
-            c1, c2 = route_crossover(p1, p2, instance)
+
+            if rand() < 0.8
+                c1, c2 = route_crossover(p1, p2, instance)
+            else
+                c1, c2 = p1, p2 
+            end
+
             # reversal_mutation!(child, 1/length(child.genotype))
-            swap_mutation!(c1, 1.5/length(c1.genotype))
-            swap_mutation!(c2, 1.5/length(c2.genotype))
+            swap_mutation!(c1, 1/length(c1.genotype))
+            swap_mutation!(c2, 1/length(c2.genotype))
 
             survivor1, survivor2 = deterministic_crowding(p1, p2, c1, c2)
 
