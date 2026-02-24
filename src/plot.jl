@@ -1,5 +1,5 @@
 using Plots
-ENV["GKSwstype"] = "100" # Headless mode (stops popup)
+#ENV["GKSwstype"] = "100" # Headless mode (stops popup)
 gr()
 
 function plot_routes(instance::Instance, ind::Individual)
@@ -69,6 +69,8 @@ function plot_routes(instance::Instance, ind::Individual)
     # Ensure the directory exists before saving
     mkpath("plots")
     savefig(p, "plots/solution_plot.png") 
-    
+    display(p)
+    println("Press Enter to close the plot...")
+    readline()
     return p
 end

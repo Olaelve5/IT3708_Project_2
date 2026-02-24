@@ -6,14 +6,15 @@ include(joinpath(@__DIR__, "Individual.jl"))
 include(joinpath(@__DIR__, "greedy_split.jl"))
 include(joinpath(@__DIR__, "plot.jl"))
 include(joinpath(@__DIR__, "Fitness.jl"))
-# include(joinpath(@__DIR__, "crossover.jl"))  # To be implemented
-# include(joinpath(@__DIR__, "mutation.jl"))   # To be implemented
+include(joinpath(@__DIR__, "crossover.jl"))  # To be implemented
+include(joinpath(@__DIR__, "mutation.jl"))   # To be implemented
+include(joinpath(@__DIR__, "parent_selection.jl"))
 
 
 # =========== Parameters ============
 const INSTANCE_PATH = "data/train_0.json"
-const POP_SIZE = 100
-const MAX_GENERATIONS = 50
+const POP_SIZE = 10000
+const MAX_GENERATIONS = 1000
 const NURSE_PENALTY_FACTOR::Float64 = 0.0
 
 
@@ -34,8 +35,9 @@ function main()
     println("Initializing population...")
     population = initialize_population(POP_SIZE, num_patients)
 
-    # Fill in splits
-    population_splits!(population, instance)
+    for ind in population
+        ind.splits = greedy_split(ind.genotype, instance)
+    end
     
     # Fill in fitness of initial population
     population_fitness!(population, instance.travel_times, NURSE_PENALTY_FACTOR)
@@ -43,21 +45,16 @@ function main()
     best_ever = population[1] # Init
     # Evolution loop
     for gen in 1:MAX_GENERATIONS
-        # TODO: Selection (e.g., tournament, roulette wheel)
-        parents = population # Placeholder for selection
-
         offspring = Individual[]
         
-        # TODO: Crossover + Mutation to fill offspring population
         while length(offspring) < POP_SIZE
-            # TODO: p1, p2 = select_parents(parents)
-            # TODO: child = crossover(p1, p2)
-            # TODO: mutate!(child)
-            
-            # For now, just copy a random parent so the code runs
-            parent = rand(parents)
-            child = Individual(copy(parent.genotype))
+            p1, p2 = select_parents(population, 10)
+            child = route_crossover(p1, p2, instance)
+            #reversal_mutation!(child, 1/length(child.genotype))
+            swap_mutation!(child, 1/length(child.genotype))
             push!(offspring, child)
+            
+            
         end
 
         # Fill in splits
@@ -68,7 +65,7 @@ function main()
         # TODO: Survivor Selection (e.g., elitism, generational replacement)
 
         population = offspring # Placeholder for survivor selection
-        
+        sort!(population, by = ind -> ind.fitness)
         # 5. Logging
         current_best_idx = argmax(ind.fitness for ind in population)
         current_best = population[current_best_idx]

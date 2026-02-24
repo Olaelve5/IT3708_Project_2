@@ -1,6 +1,8 @@
 include("individual.jl")
+include("greedy_encode_decode.jl")
+include("greedy_split.jl")
 
-function route_crossover(parent1::Individual, parent2::Individual)::Individual
+function route_crossover(parent1::Individual, parent2::Individual, instance::Instance)::Individual
     routes1 = greedy_decode(parent1)
 
     # Pick a random route from parent1
@@ -14,5 +16,7 @@ function route_crossover(parent1::Individual, parent2::Individual)::Individual
     position = rand(0:length(remaining))
     child_genotype = vcat(remaining[1:position], selected_route, remaining[position+1:end])
 
-    return Individual(child_genotype)
+    ind = Individual(child_genotype)
+    ind.splits = greedy_split(ind.genotype, instance)
+    return ind
 end
