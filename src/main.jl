@@ -82,7 +82,7 @@ function main()
 
     println("\n--- GA Loop Finished ---")
     println("Final Best Fitness: $(round(best_ever.fitness, digits=2))")
-    println("Genotype: $(best_ever.genotype)")
+    println("Percentage from benchmark: $(round(100 * (best_ever.fitness - instance.benchmark) / instance.benchmark, digits=2))%")
 
     # Plot the best solution
     println("Plotting best solution...")
