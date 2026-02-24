@@ -10,12 +10,13 @@ include(joinpath(@__DIR__, "crossover.jl"))  # To be implemented
 include(joinpath(@__DIR__, "mutation.jl"))   # To be implemented
 include(joinpath(@__DIR__, "parent_selection.jl"))
 include(joinpath(@__DIR__, "best_splits.jl"))
+include(joinpath(@__DIR__, "crowding.jl"))
 
 
 # =========== Parameters ============
-const INSTANCE_PATH = "data/train_2.json"
-const POP_SIZE = 10000
-const MAX_GENERATIONS = 200
+const INSTANCE_PATH = "data/train_0.json"
+const POP_SIZE = 5000
+const MAX_GENERATIONS = 1000
 const NURSE_PENALTY_FACTOR::Float64 = 1.0
 
 
@@ -50,10 +51,15 @@ function main()
         
         while length(offspring) < POP_SIZE
             p1, p2 = select_parents(population, 10)
-            child = route_crossover(p1, p2, instance)
+            c1, c2 = route_crossover(p1, p2, instance)
             # reversal_mutation!(child, 1/length(child.genotype))
-            swap_mutation!(child, 1/length(child.genotype))
-            push!(offspring, child)
+            swap_mutation!(c1, 1/length(c1.genotype))
+            swap_mutation!(c2, 1/length(c2.genotype))
+
+            survivor1, survivor2 = deterministic_crowding(p1, p2, c1, c2)
+
+            push!(offspring, survivor1)
+            push!(offspring, survivor2)
         end
 
         # Fill in splits
