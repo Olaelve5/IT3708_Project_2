@@ -13,10 +13,12 @@ include(joinpath(@__DIR__, "best_splits.jl"))
 
 
 # =========== Parameters ============
-const INSTANCE_PATH = "data/train_2.json"
+const INSTANCE_PATH = "data/train_0.json"
 const POP_SIZE = 10000
-const MAX_GENERATIONS = 200
-const NURSE_PENALTY_FACTOR::Float64 = 1.0
+const MAX_GENERATIONS = 2000
+const NURSE_PENALTY_FACTOR::Float64 = 10_000.0
+const TOURNAMENT_SIZE = 10
+const ELITE_COUNT = 100
 
 
 # =========== GA Loop ===========
@@ -43,16 +45,18 @@ function main()
     # Fill in fitness of initial population
     # population_fitness!(population, instance.travel_times, NURSE_PENALTY_FACTOR)
 
-    best_ever = population[1] # Init
+    best_ever = population[argmin(ind.fitness for ind in population)] # Minimize fitness
     # Evolution loop
     for gen in 1:MAX_GENERATIONS
+        sort!(population, by = ind -> ind.fitness)
+        elites = deepcopy(population[1:ELITE_COUNT])
         offspring = Individual[]
         
-        while length(offspring) < POP_SIZE
-            p1, p2 = select_parents(population, 10)
+        while length(offspring) < POP_SIZE - ELITE_COUNT
+            p1, p2 = select_parents(population, TOURNAMENT_SIZE)
             child = route_crossover(p1, p2, instance)
             # reversal_mutation!(child, 1/length(child.genotype))
-            swap_mutation!(child, 1/length(child.genotype))
+            swap_mutation!(child, 2/length(child.genotype))
             push!(offspring, child)
         end
 
@@ -65,7 +69,7 @@ function main()
         # population_fitness!(offspring, instance.travel_times, NURSE_PENALTY_FACTOR)
         # TODO: Survivor Selection (e.g., elitism, generational replacement)
 
-        population = offspring # Placeholder for survivor selection
+        population = vcat(elites, offspring)
         sort!(population, by = ind -> ind.fitness)
         # 5. Logging
         current_best_idx = argmin(ind.fitness for ind in population)

@@ -1,4 +1,4 @@
-include("individual.jl")
+include("Individual.jl")
 include("greedy_encode_decode.jl")
 include("greedy_split.jl")
 

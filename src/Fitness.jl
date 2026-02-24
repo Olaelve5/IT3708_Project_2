@@ -21,9 +21,10 @@ function individual_distance(individual::Individual, travel_matrix::Matrix{Float
     # Loop through genotype indexes (patients) of corresponding nurse and sum distance
         last_patient::Int = 1
         for patient_idx in last_split+1:split
-            current_patient = patients[patient_idx]
-            distance += travel_matrix[last_patient, current_patient+1] # To-patient travel
-            last_patient = current_patient+1
+            # Depot is index 1 in travel matrix, patient k is index k+1.
+            current_patient = patients[patient_idx] + 1
+            distance += travel_matrix[last_patient, current_patient] # To-patient travel
+            last_patient = current_patient
         end
         distance += travel_matrix[last_patient, 1] # Back to depot
         last_split = split

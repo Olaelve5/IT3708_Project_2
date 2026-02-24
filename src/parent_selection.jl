@@ -1,4 +1,4 @@
-include("individual.jl")
+include("Individual.jl")
 
 function tournament_selection(population::Vector{Individual}, tournament_size::Int)::Individual
     # Pick tournament_size random individuals and return the best
