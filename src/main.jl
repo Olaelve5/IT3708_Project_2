@@ -41,7 +41,7 @@ function main()
     end
     
     # Fill in fitness of initial population
-    population_fitness!(population, instance.travel_times, NURSE_PENALTY_FACTOR)
+    # population_fitness!(population, instance.travel_times, NURSE_PENALTY_FACTOR)
 
     best_ever = population[1] # Init
     # Evolution loop
