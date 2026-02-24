@@ -1,5 +1,5 @@
 using Plots
-#ENV["GKSwstype"] = "100" # Headless mode (stops popup)
+ENV["GKSwstype"] = "100" # Headless mode (stops popup)
 gr()
 
 function plot_routes(instance::Instance, ind::Individual)
