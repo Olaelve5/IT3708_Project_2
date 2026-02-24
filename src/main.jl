@@ -67,7 +67,7 @@ function main()
         population = offspring # Placeholder for survivor selection
         sort!(population, by = ind -> ind.fitness)
         # 5. Logging
-        current_best_idx = argmax(ind.fitness for ind in population)
+        current_best_idx = argmin(ind.fitness for ind in population)
         current_best = population[current_best_idx]
         avg_fitness = mean(ind.fitness for ind in population)
         
@@ -79,8 +79,11 @@ function main()
     
     end
 
+    percentage = (best_ever.fitness/instance.benchmark - 1) * 100
+
     println("\n--- GA Loop Finished ---")
     println("Final Best Fitness: $(round(best_ever.fitness, digits=2))")
+    println("$(round(percentage, digits=2))% worse than benchmark.")
     println("Genotype: $(best_ever.genotype)")
 
     # Plot the best solution
