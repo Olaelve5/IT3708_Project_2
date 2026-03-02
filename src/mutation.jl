@@ -29,7 +29,9 @@ function reversal_mutation!(ind::Individual, mutation_rate::Float64)
         
     # Pick two random indices and sort them
     idx1 = rand(1:n)
-    idx2 = rand(1:n)
+    
+    max_length = min(n - idx1, 10) 
+    idx2 = idx1 + rand(1:max_length)
         
     if idx1 > idx2
         idx1, idx2 = idx2, idx1
