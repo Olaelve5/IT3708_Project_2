@@ -2,13 +2,19 @@ using Plots
 ENV["GKSwstype"] = "100" # Headless mode (stops popup)
 gr()
 
-function plot_routes(instance::Instance, ind::Individual, pop_size::Int, generations::Int, percentage::Float64)
+function plot_routes(
+    instance::Instance,
+    ind::Individual,
+    pop_size::Int,
+    generations::Int,
+    percentage::Float64)
+
     split_indices = ind.splits
     title::String = "With population of $pop_size over $generations generations:\n Fitness: $(round(ind.fitness, digits=2)), "
     if percentage < 0
-        title = title * "$(-percentage)% better than benchmark."
+        title = title * "$(-round(percentage, digits=2))% better than benchmark."
     else 
-        title = title * "$(percentage)% worse than benchmark."
+        title = title * "$(round(percentage, digits=2))% worse than benchmark."
     end
     
     p = plot(title=title,
@@ -75,8 +81,5 @@ function plot_routes(instance::Instance, ind::Individual, pop_size::Int, generat
     # Ensure the directory exists before saving
     mkpath("plots")
     savefig(p, "plots/$(instance.instance_name)_solution_plot.png") 
-    display(p)
-    println("Press Enter to close the plot...")
-    readline()
     return p
 end
