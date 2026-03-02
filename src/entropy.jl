@@ -6,27 +6,29 @@ function calculate_population_entropy(population::Vector{Individual})::Float64
     end
     
     num_patients = length(population[1].genotype)
-    total_entropy = 0.0
+    edge_counts = Dict{Tuple{Int, Int}, Int}()
 
-    for i in 1:num_patients
-        counts = Dict{Int, Int}()
-        for ind in population
-            patient_id = ind.genotype[i]
-            counts[patient_id] = get(counts, patient_id, 0) + 1
+    # Count every edge in every genotype
+    for ind in population
+        for i in 1:(num_patients - 1)
+            edge = (ind.genotype[i], ind.genotype[i+1])
+            edge_counts[edge] = get(edge_counts, edge, 0) + 1
         end
-
-        position_entropy = 0.0
-        for count in values(counts)
-            p = count / pop_size
-            position_entropy -= p * log2(p)
-        end
-        
-        total_entropy += position_entropy
     end
 
-    avg_raw_entropy = total_entropy / num_patients
-    max_entropy = log2(num_patients)
-    normalized_entropy = (avg_raw_entropy / max_entropy) * 100.0
+    total_edges_in_pop = pop_size * (num_patients - 1)
+    
+    entropy = 0.0
+    for count in values(edge_counts)
+        p = count / total_edges_in_pop
+        entropy -= p * log2(p)
+    end
+
+    max_possible_edges = num_patients * (num_patients - 1)
+    max_entropy = log2(max_possible_edges)
+    min_entropy = log2(num_patients - 1)
+
+    normalized_entropy = ((entropy - min_entropy) / (max_entropy - min_entropy)) * 100.0
     
     return normalized_entropy
 end
