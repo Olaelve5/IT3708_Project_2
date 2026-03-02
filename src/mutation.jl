@@ -28,7 +28,7 @@ function reversal_mutation!(ind::Individual, mutation_rate::Float64)
     n = length(ind.genotype)
         
     # Pick two random indices and sort them
-    idx1 = rand(1:n)
+    idx1 = rand(1:n-1)
     
     max_length = min(n - idx1, 10) 
     idx2 = idx1 + rand(1:max_length)
