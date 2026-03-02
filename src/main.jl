@@ -91,15 +91,15 @@ function main()
     
     end
 
-    percentage = 100 * (best_ever.fitness - instance.benchmark) / instance.benchmark
+    best_percentage::Float64 = round(100 * (best_ever.fitness - instance.benchmark) / instance.benchmark, digits=2)
 
     println("\n--- GA Loop Finished ---")
     println("Final Best Fitness: $(round(best_ever.fitness, digits=2))")
-    println("Percentage from benchmark: $(round(percentage, digits=2))% \n")
+    println("Percentage from benchmark: $best_percentage% \n")
 
     # Plot the best solution
     println("Plotting best solution...")
-    plot_routes(instance, best_ever)
+    plot_routes(instance, best_ever, POP_SIZE, MAX_GENERATIONS, best_percentage)
 
     # Placeholder to test plot
     println("Route splits (indices for each split): $(best_ever.splits)")
