@@ -32,7 +32,7 @@ function prins_algo(genotype::Vector{Int}, instance::Instance)
             arrival_time = route_clock + drive_time
 
             # too late
-            if arrival_time > patient.end_time
+            if arrival_time + patient.care_time > patient.end_time
                 break
             end
 

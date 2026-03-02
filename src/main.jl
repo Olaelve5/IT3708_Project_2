@@ -6,8 +6,8 @@ include(joinpath(@__DIR__, "Individual.jl"))
 include(joinpath(@__DIR__, "greedy_split.jl"))
 include(joinpath(@__DIR__, "plot.jl"))
 include(joinpath(@__DIR__, "Fitness.jl"))
-include(joinpath(@__DIR__, "crossover.jl"))  # To be implemented
-include(joinpath(@__DIR__, "mutation.jl"))   # To be implemented
+include(joinpath(@__DIR__, "crossover.jl")) 
+include(joinpath(@__DIR__, "mutation.jl"))   
 include(joinpath(@__DIR__, "parent_selection.jl"))
 include(joinpath(@__DIR__, "best_splits.jl"))
 include(joinpath(@__DIR__, "crowding.jl"))
@@ -16,22 +16,20 @@ include(joinpath(@__DIR__, "entropy.jl"))
 
 
 # =========== Parameters ============
-const INSTANCE_PATH = "data/train_8.json"
-const POP_SIZE = 10000
-const MAX_GENERATIONS = 1500
-const NURSE_PENALTY_FACTOR::Float64 = 1.0
+const POP_SIZE = 2000
+const MAX_GENERATIONS = 5000
 
 
 # =========== GA Loop ===========
-function main()
+function run_instance(instance_path::String)
     println("\n--- Starting GA ---")
     
     # Load Data
-    if !isfile(INSTANCE_PATH)
-        error("File not found: $INSTANCE_PATH")
+    if !isfile(instance_path)
+        error("File not found: $instance_path")
     end
-    println("Loading instance: $INSTANCE_PATH")
-    instance = load_instance(INSTANCE_PATH)
+    println("Loading instance: $instance_path")
+    instance = load_instance(instance_path)
     num_patients = length(instance.patients)
     println("Loaded $(instance.instance_name): $num_patients patients, $(instance.nbr_nurses) nurses.")
 
@@ -43,52 +41,66 @@ function main()
         ind.fitness, ind.splits = prins_algo(ind.genotype, instance)
     end
 
-    best_ever = population[1] # Init
+    best_ever = population[1]
+
     # Evolution loop
     for gen in 1:MAX_GENERATIONS
-        offspring = Individual[]
         
-        while length(offspring) < POP_SIZE
-            p1, p2 = select_parents(population, 10)
+        # Create random pairs for crossover
+        random_indices = randperm(POP_SIZE)
+        
+        for i in 1:2:POP_SIZE
+            p1_idx = random_indices[i]
+            p2_idx = random_indices[i+1]
+            p1 = population[p1_idx]
+            p2 = population[p2_idx]
 
+            # Crossover
             if rand() < 0.8
                 c1, c2 = route_crossover(p1, p2, instance)
             else
-                c1, c2 = p1, p2 
+                c1 = deepcopy(p1)
+                c2 = deepcopy(p2)
             end
 
-            # reversal_mutation!(child, 1/length(child.genotype))
-            swap_mutation!(c1, 1/length(c1.genotype))
-            swap_mutation!(c2, 1/length(c2.genotype))
+            # Mutate
+            hybrid_mutation!(c1, 0.2)
+            hybrid_mutation!(c2, 0.2)
 
+            # Calculate fitness if necessary
+            if c1.fitness == Inf || c1.fitness == 0.0
+                c1.fitness, c1.splits = prins_algo(c1.genotype, instance)
+            end
+            if c2.fitness == Inf || c2.fitness == 0.0
+                c2.fitness, c2.splits = prins_algo(c2.genotype, instance)
+            end
+
+            # Crowding
             survivor1, survivor2 = deterministic_crowding(p1, p2, c1, c2)
-
-            push!(offspring, survivor1)
-            push!(offspring, survivor2)
+            population[p1_idx] = survivor1
+            population[p2_idx] = survivor2
         end
 
-        # Fill in splits
-        for child in offspring
-            child.fitness, child.splits = prins_algo(child.genotype, instance)
-        end
-
-        #population = offspring
-        population = elitism(population, offspring, 50)
+        # Sort the population so the best is at index 1
         sort!(population, by = ind -> ind.fitness)
 
-        # 5. Logging
-        current_best_idx = argmin(ind.fitness for ind in population)
-        current_best = population[current_best_idx]
+        # Always keep the best one from the previous generation (elitism)
+        if population[1].fitness > best_ever.fitness
+            population[end] = deepcopy(best_ever)
+            sort!(population, by = ind -> ind.fitness)
+        end
+
+        # Logging
+        current_best = population[1]
         avg_fitness = mean(ind.fitness for ind in population)
         percentage = 100 * (current_best.fitness - instance.benchmark) / instance.benchmark
         entropy = calculate_population_entropy(population)
         
-        println("Gen $gen | Best: $(round(current_best.fitness, digits=2)) | Avg: $(round(avg_fitness, digits=2)) | % from benchmark: $(round(percentage, digits=2))% | Entropy: $(round(entropy, digits=2))%")
+        println("Gen $gen | Best: $(round(current_best.fitness, digits=2)) | Avg: $(round(avg_fitness, digits=2)) | % from BM: $(round(percentage, digits=2))% | Entropy: $(round(entropy, digits=2))%")
 
         if current_best.fitness < best_ever.fitness
-            best_ever = current_best
+            best_ever = deepcopy(current_best)
         end
-    
     end
 
     percentage = 100 * (best_ever.fitness - instance.benchmark) / instance.benchmark
@@ -97,12 +109,42 @@ function main()
     println("Final Best Fitness: $(round(best_ever.fitness, digits=2))")
     println("Percentage from benchmark: $(round(percentage, digits=2))% \n")
 
-    # Plot the best solution
-    println("Plotting best solution...")
-    plot_routes(instance, best_ever)
+    return (instance_name=instance.instance_name, best_fitness=best_ever.fitness, benchmark=instance.benchmark, percentage=percentage, best_individual=best_ever, instance=instance)
+end
 
-    # Placeholder to test plot
-    println("Route splits (indices for each split): $(best_ever.splits)")
+function main()
+    results = []
+
+    for i in 8:8
+        path = "data/train_$i.json"
+        result = run_instance(path)
+        push!(results, result)
+    end
+
+    # Print summary table
+    println("\n" * "="^80)
+    println("SUMMARY OF ALL INSTANCES")
+    println("="^80)
+    println(rpad("Instance", 20) * rpad("Best Fitness", 15) * rpad("Benchmark", 15) * rpad("% from BM", 15))
+    println("-"^80)
+    for r in results
+        println(
+            rpad(r.instance_name, 20) *
+            rpad(round(r.best_fitness, digits=2), 15) *
+            rpad(round(r.benchmark, digits=2), 15) *
+            rpad(string(round(r.percentage, digits=2), "%"), 15)
+        )
+    end
+    println("-"^80)
+    avg_pct = mean(r.percentage for r in results)
+    println("Average % from benchmark: $(round(avg_pct, digits=2))%")
+    println("="^80)
+
+    # Plot the best solution for each instance
+    for r in results
+        println("\nPlotting best solution for $(r.instance_name)...")
+        plot_routes(r.instance, r.best_individual)
+    end
 end
 
 # Run the script

@@ -1,17 +1,22 @@
 function swap_mutation!(ind::Individual, mutation_rate::Float64)
     """
-    Swaps two random genes in the individual's genotype with a given mutation rate.
+    Swaps random genes in the individual's genotype with a given mutation rate.
     """
-    
-    if rand() < mutation_rate
-        n = length(ind.genotype)
 
-        # Pick two random unique indices and swap their values
-        idx1, idx2 = rand(1:n, 2)
-        ind.genotype[idx1], ind.genotype[idx2] = ind.genotype[idx2], ind.genotype[idx1]
-        
-        # Set fitness to 0.0 to indicate it needs re-evaluation
-        ind.fitness = 0.0 
+    n = length(ind.genotype)
+    has_mutated = false
+
+    for i in 1:n
+        if rand() < mutation_rate
+            j = rand(1:n)
+            
+            ind.genotype[i], ind.genotype[j] = ind.genotype[j], ind.genotype[i]
+            has_mutated = true
+        end
+    end
+    
+    if has_mutated
+        ind.fitness = Inf
     end
 end
 
@@ -20,25 +25,33 @@ function reversal_mutation!(ind::Individual, mutation_rate::Float64)
     """
     Reverses a random segment of the individual's genotype with a given mutation rate.
     """
-    
-    if rand() < mutation_rate
-        n = length(ind.genotype)
+    n = length(ind.genotype)
         
-        # Pick two random indices and sort them
-        idx1 = rand(1:n)
-        idx2 = rand(1:n)
+    # Pick two random indices and sort them
+    idx1 = rand(1:n)
+    idx2 = rand(1:n)
         
-        if idx1 > idx2
-            idx1, idx2 = idx2, idx1
-        end
+    if idx1 > idx2
+        idx1, idx2 = idx2, idx1
+    end
         
-        # Only reverse if they are different to avoid unnecessary operations
-        if idx1 != idx2
-            reverse!(ind.genotype, idx1, idx2)
+    # Only reverse if they are different to avoid unnecessary operations
+    if idx1 != idx2
+        reverse!(ind.genotype, idx1, idx2)
 
-            # Reset fitness and splits to indicate it needs re-evaluation
-            ind.fitness = 0.0
-            ind.splits = Int[]
+        # Reset fitness and splits to indicate it needs re-evaluation
+        ind.fitness = Inf
+        ind.splits = Int[]
+    end
+end
+
+
+function hybrid_mutation!(ind::Individual, overall_mutation_rate::Float64)
+    if rand() < overall_mutation_rate
+        if rand() < 0.3
+            swap_mutation!(ind, 1/length(ind.genotype))
+        else
+            reversal_mutation!(ind, 1.0)
         end
     end
 end
