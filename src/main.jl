@@ -69,6 +69,7 @@ function run_instance(instance_path::String)
         for island_idx in 1:NUM_ISLANDS
             current_island = islands[island_idx]
             random_indices = randperm(ISLAND_POP_SIZE)
+            mutation_rate = adaptive_mutation_rate(calculate_population_entropy(current_island))
             
             for i in 1:2:ISLAND_POP_SIZE
                 p1_idx = random_indices[i]
