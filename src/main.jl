@@ -3,15 +3,12 @@ using Statistics
 
 include(joinpath(@__DIR__, "load_data.jl"))
 include(joinpath(@__DIR__, "Individual.jl"))
-include(joinpath(@__DIR__, "greedy_split.jl"))
 include(joinpath(@__DIR__, "plot.jl"))
-include(joinpath(@__DIR__, "Fitness.jl"))
 include(joinpath(@__DIR__, "crossover.jl")) 
 include(joinpath(@__DIR__, "mutation.jl"))   
 include(joinpath(@__DIR__, "parent_selection.jl"))
 include(joinpath(@__DIR__, "best_splits.jl"))
 include(joinpath(@__DIR__, "crowding.jl"))
-include(joinpath(@__DIR__, "elitism.jl"))
 include(joinpath(@__DIR__, "entropy.jl"))
 
 # =========== Parameters ============
@@ -21,16 +18,6 @@ const MAX_GENERATIONS = 10000
 const CROSSOVER_RATE = 0.9
 const ROUTE_CROSSOVER_SHARE = 0.6
 const BASE_MUTATION_RATE = 0.25
-
-function adaptive_mutation_rate(entropy::Float64)::Float64
-    if entropy < 25.0
-        return 0.35
-    elseif entropy > 45.0
-        return 0.15
-    else
-        return BASE_MUTATION_RATE
-    end
-end
 const MIGRATION_INTERVAL = 100   
 const NUM_MIGRANTS = 2           
 
@@ -69,7 +56,7 @@ function run_instance(instance_path::String)
         for island_idx in 1:NUM_ISLANDS
             current_island = islands[island_idx]
             random_indices = randperm(ISLAND_POP_SIZE)
-            mutation_rate = adaptive_mutation_rate(calculate_population_entropy(current_island))
+            mutation_rate = BASE_MUTATION_RATE
             
             for i in 1:2:ISLAND_POP_SIZE
                 p1_idx = random_indices[i]
