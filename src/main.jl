@@ -49,6 +49,10 @@ function run_instance(instance_path::String)
     # Track the best solution ever found across all islands
     global_best_ever = deepcopy(islands[1][1])
 
+    # Track fitness and entropy
+    fitness_history = Float64[]
+    entropy_history = Float64[]
+
     # Evolution loop
     for gen in 1:MAX_GENERATIONS
         
@@ -144,6 +148,9 @@ function run_instance(instance_path::String)
             global_avg = mean(ind.fitness for ind in all_individuals)
             global_entropy = calculate_population_entropy(all_individuals)
             percentage = 100 * (global_best_ever.fitness - instance.benchmark) / instance.benchmark
+
+            push!(fitness_history, global_best_ever.fitness)
+            push!(entropy_history, global_entropy)
             
             println("Gen $gen | Global Best: $(round(global_best_ever.fitness, digits=2)) | Global Avg: $(round(global_avg, digits=2)) | % from BM: $(round(percentage, digits=2))% | Global Entropy: $(round(global_entropy, digits=2))%")
         end
@@ -155,7 +162,16 @@ function run_instance(instance_path::String)
     println("Final Best Fitness: $(round(global_best_ever.fitness, digits=2))")
     println("Percentage from benchmark: $best_percentage% \n")
 
-    return (instance_name=instance.instance_name, best_fitness=global_best_ever.fitness, benchmark=instance.benchmark, percentage=best_percentage, best_individual=global_best_ever, instance=instance)
+    return (
+        instance_name=instance.instance_name, 
+        best_fitness=global_best_ever.fitness, 
+        benchmark=instance.benchmark, 
+        percentage=best_percentage, 
+        best_individual=global_best_ever, 
+        instance=instance, 
+        fitness_history=fitness_history, 
+        entropy_history=entropy_history
+        )
 end
 
 function main()
@@ -189,7 +205,8 @@ function main()
     # Plots
     for r in results
         println("\nPlotting best solution for $(r.instance_name)...")
-        plot_routes(r.instance, r.best_individual)
+        plot_routes(r.instance, r.best_individual, ISLAND_POP_SIZE, MAX_GENERATIONS, r.percentage)
+        plot_convergence(r.fitness_history, r.entropy_history, r.instance_name)
     end
 end
 

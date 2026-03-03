@@ -1,6 +1,5 @@
 include("Individual.jl")
 include("greedy_encode_decode.jl")
-include("greedy_split.jl")
 
 function route_crossover(parent1::Individual, parent2::Individual, instance::Instance)::Tuple{Individual, Individual}
     # Child 1 ----------------------->

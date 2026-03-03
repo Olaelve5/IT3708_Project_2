@@ -79,7 +79,36 @@ function plot_routes(
              shape=:circle)
 
     # Ensure the directory exists before saving
-    mkpath("plots")
-    savefig(p, "plots/$(instance.instance_name)_solution_plot.png") 
+    mkpath("plots/solutions")
+    savefig(p, "plots/solutions/$(instance.instance_name)_solution_plot.png") 
     return p
 end
+
+
+function plot_convergence(fitness_history::Vector{Float64}, entropy_history::Vector{Float64}, instance_name::String, best )
+    # Create the top plot (Fitness)
+    p1 = plot(fitness_history, 
+              title="Convergence History: $instance_name", 
+              ylabel="Best Fitness", 
+              label=false, 
+              color=:blue, 
+              linewidth=2)
+
+    # Create the bottom plot (Entropy)
+    p2 = plot(entropy_history, 
+              ylabel="Entropy (%)", 
+              xlabel="Generations", 
+              label=false, 
+              color=:green, 
+              linewidth=2)
+
+    # Combine them into a stacked layout (2 rows, 1 column) and link the X-axis
+    final_plot = plot(p1, p2, layout=(2, 1), size=(800, 600), link=:x, margin=5Plots.mm)
+
+    # Save as PDF
+    mkpath("plots/convergence")
+    filename = "plots/convergence/convergence_$(instance_name).pdf"
+    savefig(final_plot, filename)
+    println("Saved convergence plot to $filename")
+end
+
