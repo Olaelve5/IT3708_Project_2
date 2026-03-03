@@ -17,36 +17,6 @@ function swap_mutation!(ind::Individual, mutation_rate::Float64)
 
     if has_mutated
         ind.fitness = Inf
-<<<<<<< Updated upstream
-    end
-end
-
-
-function reversal_mutation!(ind::Individual, mutation_rate::Float64)
-    """
-    Reverses a random segment of the individual's genotype with a given mutation rate.
-    """
-    n = length(ind.genotype)
-        
-    # Pick two random indices and sort them
-    idx1 = rand(1:n-1)
-    
-    max_length = min(n - idx1, 10) 
-    idx2 = idx1 + rand(1:max_length)
-        
-    if idx1 > idx2
-        idx1, idx2 = idx2, idx1
-    end
-        
-    # Only reverse if they are different to avoid unnecessary operations
-    if idx1 != idx2
-        reverse!(ind.genotype, idx1, idx2)
-
-        # Reset fitness and splits to indicate it needs re-evaluation
-        ind.fitness = Inf
-=======
->>>>>>> Stashed changes
-        ind.splits = Int[]
     end
 end
 
