@@ -1,6 +1,6 @@
 include("Individual.jl")
 
-#Decodes individual to a list of lists where each inner list represents a nurse route.
+# Decodes individual to a list of lists where each inner list represents a nurse route.
 function greedy_decode(individual::Individual)::Vector{Vector{Int}}
     routes = Vector{Vector{Int}}()
     prev = 0
@@ -11,7 +11,7 @@ function greedy_decode(individual::Individual)::Vector{Vector{Int}}
     return routes
 end
 
-#Mutates
+# Mutates
 function greedy_encode!(individual::Individual, routes::Vector{Vector{Int}})
     individual.genotype = vcat(routes...)
     
