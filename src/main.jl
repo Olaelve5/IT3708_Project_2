@@ -18,6 +18,19 @@ include(joinpath(@__DIR__, "entropy.jl"))
 # =========== Parameters ============
 const POP_SIZE = 2000
 const MAX_GENERATIONS = 5000
+const CROSSOVER_RATE = 0.9
+const ROUTE_CROSSOVER_SHARE = 0.6
+const BASE_MUTATION_RATE = 0.25
+
+function adaptive_mutation_rate(entropy::Float64)::Float64
+    if entropy < 25.0
+        return 0.35
+    elseif entropy > 45.0
+        return 0.15
+    else
+        return BASE_MUTATION_RATE
+    end
+end
 
 
 # =========== GA Loop ===========
@@ -45,6 +58,8 @@ function run_instance(instance_path::String)
 
     # Evolution loop
     for gen in 1:MAX_GENERATIONS
+        entropy = calculate_population_entropy(population)
+        mutation_rate = adaptive_mutation_rate(entropy)
         
         # Create random pairs for crossover
         random_indices = randperm(POP_SIZE)
@@ -56,16 +71,16 @@ function run_instance(instance_path::String)
             p2 = population[p2_idx]
 
             # Crossover
-            if rand() < 0.8
-                c1, c2 = route_crossover(p1, p2, instance)
+            if rand() < CROSSOVER_RATE
+                c1, c2 = mixed_crossover(p1, p2, instance; route_share=ROUTE_CROSSOVER_SHARE)
             else
                 c1 = deepcopy(p1)
                 c2 = deepcopy(p2)
             end
 
             # Mutate
-            hybrid_mutation!(c1, 0.2)
-            hybrid_mutation!(c2, 0.2)
+            hybrid_mutation!(c1, mutation_rate)
+            hybrid_mutation!(c2, mutation_rate)
 
             # Calculate fitness if necessary
             if c1.fitness == Inf || c1.fitness == 0.0
@@ -94,9 +109,8 @@ function run_instance(instance_path::String)
         current_best = population[1]
         avg_fitness = mean(ind.fitness for ind in population)
         percentage = 100 * (current_best.fitness - instance.benchmark) / instance.benchmark
-        entropy = calculate_population_entropy(population)
         
-        println("Gen $gen | Best: $(round(current_best.fitness, digits=2)) | Avg: $(round(avg_fitness, digits=2)) | % from BM: $(round(percentage, digits=2))% | Entropy: $(round(entropy, digits=2))%")
+        println("Gen $gen | Best: $(round(current_best.fitness, digits=2)) | Avg: $(round(avg_fitness, digits=2)) | % from BM: $(round(percentage, digits=2))% | Entropy: $(round(entropy, digits=2))% | Mutation: $(round(mutation_rate * 100, digits=1))%")
 
         if current_best.fitness < best_ever.fitness
             best_ever = deepcopy(current_best)
@@ -115,7 +129,7 @@ end
 function main()
     results = []
 
-    for i in 8:8
+    for i in 6:6
         path = "data/train_$i.json"
         result = run_instance(path)
         push!(results, result)
