@@ -25,6 +25,10 @@ function reversal_mutation!(ind::Individual, mutation_rate::Float64)
     """
     Reverses a random segment of the individual's genotype with a given mutation rate.
     """
+    if rand() >= mutation_rate
+        return  
+    end
+
     n = length(ind.genotype)
         
     # Pick two random indices and sort them
@@ -53,7 +57,7 @@ function hybrid_mutation!(ind::Individual, overall_mutation_rate::Float64)
         if rand() < 0.3
             swap_mutation!(ind, 1/length(ind.genotype))
         else
-            reversal_mutation!(ind, 1.0)
+            reversal_mutation!(ind, 0.2)
         end
     end
 end
