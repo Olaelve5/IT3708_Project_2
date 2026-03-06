@@ -2,6 +2,7 @@ using Random
 using Statistics 
 
 include(joinpath(@__DIR__, "load_data.jl"))
+include(joinpath(@__DIR__, "solution_export.jl"))
 
 Random.seed!(123)
 
@@ -9,14 +10,13 @@ include(joinpath(@__DIR__, "Individual.jl"))
 include(joinpath(@__DIR__, "plot.jl"))
 include(joinpath(@__DIR__, "crossover.jl")) 
 include(joinpath(@__DIR__, "mutation.jl"))   
-include(joinpath(@__DIR__, "parent_selection.jl"))
 include(joinpath(@__DIR__, "best_splits.jl"))
 include(joinpath(@__DIR__, "crowding.jl"))
 include(joinpath(@__DIR__, "entropy.jl"))
 
 # =========== Parameters ============
 const ISLAND_POP_SIZE = 600  
-const NUM_ISLANDS = 4
+const NUM_ISLANDS = 5
 const MAX_GENERATIONS = 10000
 const CROSSOVER_RATE = 0.9
 const ROUTE_CROSSOVER_SHARE = 0.6
@@ -181,7 +181,7 @@ function main()
     results = []
 
     for i in 1:3
-        if i == 1
+        if i < 3
             gens = 10000
         else
             gens = 25000
@@ -211,12 +211,17 @@ function main()
     println("Average % from benchmark: $(round(avg_pct, digits=2))%")
     println("="^80)
 
+    # Export solutions
+    for r in results
+        export_solution(r.best_individual, r.instance, "solutions/$(r.instance_name).txt")
+    end
+
     # Plots
-    # for r in results
-    #     println("\nPlotting best solution for $(r.instance_name)...")
-    #     plot_routes(r.instance, r.best_individual, ISLAND_POP_SIZE, MAX_GENERATIONS, r.percentage)
-    #     plot_convergence(r.fitness_history, r.entropy_history, r.instance_name)
-    # end
+    for r in results
+        println("\nPlotting best solution for $(r.instance_name)...")
+        plot_routes(r.instance, r.best_individual, ISLAND_POP_SIZE, MAX_GENERATIONS, r.percentage)
+        plot_convergence(r.fitness_history, r.entropy_history, r.instance_name)
+    end
 end
 
 # Run the script
