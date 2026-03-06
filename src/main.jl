@@ -2,6 +2,9 @@ using Random
 using Statistics 
 
 include(joinpath(@__DIR__, "load_data.jl"))
+
+Random.seed!(123)
+
 include(joinpath(@__DIR__, "Individual.jl"))
 include(joinpath(@__DIR__, "plot.jl"))
 include(joinpath(@__DIR__, "crossover.jl")) 
@@ -13,8 +16,8 @@ include(joinpath(@__DIR__, "entropy.jl"))
 
 # =========== Parameters ============
 const ISLAND_POP_SIZE = 600  
-const NUM_ISLANDS = 5
-const MAX_GENERATIONS = 20000
+const NUM_ISLANDS = 4
+const MAX_GENERATIONS = 10000
 const CROSSOVER_RATE = 0.9
 const ROUTE_CROSSOVER_SHARE = 0.6
 const BASE_MUTATION_RATE = 0.25
@@ -22,9 +25,7 @@ const MIGRATION_INTERVAL = 100
 const NUM_MIGRANTS = 2           
 
 # =========== GA Loop ===========
-function run_instance(instance_path::String)
-    Random.seed!(123)
-
+function run_instance(instance_path::String, max_generations::Int)
     println("\n--- Starting GA ---")
     
     # Load Data
@@ -56,7 +57,7 @@ function run_instance(instance_path::String)
     entropy_history = Float64[]
 
     # Evolution loop
-    for gen in 1:MAX_GENERATIONS
+    for gen in 1:max_generations
         
         # Evolution phase for each island
         for island_idx in 1:NUM_ISLANDS
@@ -179,9 +180,15 @@ end
 function main()
     results = []
 
-    for i in 2:2
+    for i in 1:3
+        if i == 1
+            gens = 10000
+        else
+            gens = 25000
+        end
+
         path = "data/test_instance_$i.json"
-        result = run_instance(path)
+        result = run_instance(path, gens)
         push!(results, result)
     end
 
@@ -205,11 +212,11 @@ function main()
     println("="^80)
 
     # Plots
-    for r in results
-        println("\nPlotting best solution for $(r.instance_name)...")
-        plot_routes(r.instance, r.best_individual, ISLAND_POP_SIZE, MAX_GENERATIONS, r.percentage)
-        plot_convergence(r.fitness_history, r.entropy_history, r.instance_name)
-    end
+    # for r in results
+    #     println("\nPlotting best solution for $(r.instance_name)...")
+    #     plot_routes(r.instance, r.best_individual, ISLAND_POP_SIZE, MAX_GENERATIONS, r.percentage)
+    #     plot_convergence(r.fitness_history, r.entropy_history, r.instance_name)
+    # end
 end
 
 # Run the script
