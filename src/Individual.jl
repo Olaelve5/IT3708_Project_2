@@ -1,5 +1,4 @@
 using Random
-Random.seed!(123)
 
 mutable struct Individual
     genotype::Vector{Int}

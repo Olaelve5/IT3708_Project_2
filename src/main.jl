@@ -12,9 +12,9 @@ include(joinpath(@__DIR__, "crowding.jl"))
 include(joinpath(@__DIR__, "entropy.jl"))
 
 # =========== Parameters ============
-const ISLAND_POP_SIZE = 400  
+const ISLAND_POP_SIZE = 600  
 const NUM_ISLANDS = 5
-const MAX_GENERATIONS = 10000
+const MAX_GENERATIONS = 20000
 const CROSSOVER_RATE = 0.9
 const ROUTE_CROSSOVER_SHARE = 0.6
 const BASE_MUTATION_RATE = 0.25
@@ -23,6 +23,8 @@ const NUM_MIGRANTS = 2
 
 # =========== GA Loop ===========
 function run_instance(instance_path::String)
+    Random.seed!(123)
+
     println("\n--- Starting GA ---")
     
     # Load Data
@@ -177,8 +179,8 @@ end
 function main()
     results = []
 
-    for i in 6:6
-        path = "data/train_$i.json"
+    for i in 2:2
+        path = "data/test_instance_$i.json"
         result = run_instance(path)
         push!(results, result)
     end

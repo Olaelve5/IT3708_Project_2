@@ -85,7 +85,7 @@ function plot_routes(
 end
 
 
-function plot_convergence(fitness_history::Vector{Float64}, entropy_history::Vector{Float64}, instance_name::String, best )
+function plot_convergence(fitness_history::Vector{Float64}, entropy_history::Vector{Float64}, instance_name::String)
     # Create the top plot (Fitness)
     p1 = plot(fitness_history, 
               title="Convergence History: $instance_name", 
